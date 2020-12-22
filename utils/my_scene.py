@@ -114,7 +114,7 @@ class MyScene(QGraphicsScene):
                 self.update()
 
     def select_listItem(self):
-        """使选中的列表项高亮显示"""
+        """使选中的关键点列表项高亮显示"""
         index = self.points_list.index(self.current_point)
         item = self.listWidget.item(index)
         item.setSelected(True)
@@ -122,8 +122,8 @@ class MyScene(QGraphicsScene):
 
     def update_listItem(self, x, y):
         index, item = self.select_listItem()
-        text = str(index + 1) + ": " + str((round(x, 2), round(y, 2)))  # 更改item的坐标
-        # item.setText(text)
+        # text = str(index + 1) + ": " + str((round(x, 2), round(y, 2)))  # 更改item的坐标
+        text = str((round(x, 2), round(y, 2)))  # 更改item的坐标
         item.set_myText(index, text)
 
     def zoomRequest(self, delta):

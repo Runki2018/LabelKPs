@@ -89,13 +89,14 @@ class my_UI:
         self.load_dirpath = QFileDialog.getExistingDirectory(self.ui, "选择图片加载目录", './')
         if self.load_dirpath != "":
             self.saveButton.setEnabled(True)  # 只有选择了图像加载路径后，才能选择标注保持路径
+            self.hintBox.setText("提示:" + self.load_dirpath)
         else:
             self.hintBox.setText("提示：加载目录为空！")
         print("load images directory!")
         print(self.load_dirpath)
 
     def save_dir(self):
-        self.save_file, _ = QFileDialog.getOpenFileName(self.ui, "选择标注文件", './')
+        self.save_file, _ = QFileDialog.getOpenFileName(self.ui, "选择标注文件", './', 'JSON files(*.json)')
         print("save images directory!")
         print(self.save_file)
         if self.save_file != "":
@@ -105,6 +106,7 @@ class my_UI:
             self.preButton.setEnabled(True)
             self.nextButton.setEnabled(True)
             self.goButton.setEnabled(True)
+            self.hintBox.setText("提示:" + self.save_file)
         else:
             self.hintBox.setText("提示：未选择标注文件！")
 
@@ -121,8 +123,8 @@ class my_UI:
             ki = 2 * k
             keypoint = (round(keypoints[ki], 2), round(keypoints[ki + 1], 2))
             self.points_list.append(keypoint)
-            item_content = str(k + 1) + ": " + str(keypoint)
-            item = my_kps_Item(k, item_content)
+            item_text = str(keypoint)
+            item = my_kps_Item(k, item_text)
             self.listWidget.addItem(item)
 
     def init_graphicsView(self):

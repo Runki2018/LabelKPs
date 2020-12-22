@@ -2,40 +2,50 @@ from PySide2.QtWidgets import QListWidgetItem,QListWidget,QListView
 from PySide2.QtCore import Qt
 from PySide2 import QtGui, QtWidgets, QtCore
 from PySide2.QtWidgets import QStyle
-from PySide2.QtGui import QPalette, QColor, QBrush
+from PySide2.QtGui import QPalette, QColor, QBrush, QFont
 
 
 class my_kps_Item(QtWidgets.QListWidgetItem):
     """
         给关键点列表添加实现自己的关键点项
     """
-    background_color = [Qt.red, Qt.cyan, QColor(170, 85, 130), QColor(222, 96, 27), Qt.blue, Qt.green]
-    type_list = [" 手腕   ", " 拇指   ", " 食指   ", " 中指  ", "无名指", " 小指  "]
+    type_list = ["\t手腕", "\t拇指", "\t食指", "\t中指", "\t无名指", "\t小指"]
+    color = [Qt.red, QColor(64, 224, 208), Qt.magenta, QColor(222, 96, 27), Qt.blue, Qt.green]
 
     def __init__(self, index=0, text=None):
         super(my_kps_Item, self).__init__()
         self.set_myText(index, text)
+        self.set_myTextColor(index)
         # self.set_myBackgroundColor(index)
 
     def set_myText(self, index=0, text=""):
         """给列表项添加自定义项，包括图标和底色"""
         self.setTextAlignment(Qt.AlignBottom)
+        font = QFont()
+        font.setBold(True)
+        self.setFont(font)  # 字体加粗
+        text = str(index + 1) + "\t" + text
         if index == 0:
             finger = self.type_list[0]
         else:
             index = (index - 1) // 4 + 1
             finger = self.type_list[index]
-        text = finger + text
+        text = text + finger
         self.setText(text)
 
     def set_myBackgroundColor(self, index):
         if index == 0:
-            self.setBackgroundColor(self.background_color[0])
+            self.setBackgroundColor(self.color[0])
         else:
             index = (index - 1) // 4 + 1
-            self.setBackgroundColor(self.background_color[index])
+            self.setBackgroundColor(self.color[index])
 
-
+    def set_myTextColor(self, index):
+        if index == 0:
+            self.setTextColor(self.color[0])
+        else:
+            index = (index - 1) // 4 + 1
+            self.setTextColor(self.color[index])
 
 
 # class HTMLDelegate(QtWidgets.QStyledItemDelegate):
