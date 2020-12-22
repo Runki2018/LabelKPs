@@ -122,7 +122,6 @@ class MyScene(QGraphicsScene):
 
     def update_listItem(self, x, y):
         index, item = self.select_listItem()
-        # text = str(index + 1) + ": " + str((round(x, 2), round(y, 2)))  # 更改item的坐标
         text = str((round(x, 2), round(y, 2)))  # 更改item的坐标
         item.set_myText(index, text)
 

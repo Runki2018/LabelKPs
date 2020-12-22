@@ -5,6 +5,7 @@ from PySide2.QtCore import QFile, QIODevice, QSize
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QFileDialog
 from utils.ListItem import my_kps_Item
+from utils.ListItem import my_kps_Item
 from utils.my_scene import MyScene
 from utils.label import label_it
 from PySide2.QtGui import QPixmap, QIcon
@@ -115,10 +116,10 @@ class my_UI:
     def update_widget(self):
         text = "图片数：" + str(self.label.index + 1) + "/" + str(self.img_number)
         self.process_number.setText(text)
-        self.init_listWidget(self.label.get_raw_keypoints())
+        self.init_listWidget_points(self.label.get_raw_keypoints())
         self.init_graphicsView()
 
-    def init_listWidget(self, keypoints):
+    def init_listWidget_points(self, keypoints):
         self.points_list = []
         self.listWidget_points.clear()
         for k in range(21):
@@ -130,9 +131,17 @@ class my_UI:
             self.listWidget_points.addItem(item)
 
     def init_graphicsView(self):
-        img_path = self.load_dirpath + '/' + self.label.read_image()
+        img_path = self.load_dirpath + '/' + self.label.get_imagePath()
         print(img_path)
         self.scene.init_scene(img_path, self.points_list)
+
+    def init_listWidget_files(self):
+        """初始化files框列表项"""
+        images_list = self.label.images_list
+        for i, img_info in enumerate(images_list):
+            item_text = img_info["file_name"]
+            check_state = self.label.image_CheckState(i)
+            item = my_kps_Item(k, item_text)
 
     def pre_img(self):
         # x = self.ui.graphicsView
@@ -167,19 +176,5 @@ class my_UI:
             raise TypeError("item must be LabelListWidgetItem")
         self.listWidget_points.addItem(item)
 
-    # def keypoints_from_listWidget(self):
-    #     """从列表框获取关键点坐标"""
-    #     keypoints = []
-    #     count = self.listWidget.count()
-    #     for index in range(count):
-    #         item = self.listWidget.item(index)
-    #         text2tuple = eval(item.text().split(': ')[1])  # 将列表项中的字符转换为元组（x,y）
-    #         print(text2tuple)
-    #         keypoints.extend(text2tuple)  # 将 x,y 追加到列表
-    #     sr = self.scene.w / self.scene.width()  # 图片的缩放比例。 x' * w' = x * w
-    #     if sr > 1:  # 表明图像缩小了,向下取整
-    #         keypoints = [math.floor(k * sr) for k in keypoints]
-    #     else:
-    #         keypoints = [math.ceil(k * sr) for k in keypoints]
-    #     return keypoints
+
 

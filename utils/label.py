@@ -22,14 +22,14 @@ class label_it:
             self.index = 0  # 已处理的图像数
         self.image_number = len(self.images_list)  # 图像总数
 
-    def read_image(self):
+    def get_imagePath(self):
         return self.images_list[self.index]["file_name"]
 
     def get_images_number(self):
         return len(self.images_list)
 
     def get_raw_keypoints(self):
-        """过去粗略的关键点坐标"""
+        """获取粗略的关键点坐标"""
         keypoints = self.annotations_list[self.index]["keypoints"].copy()  # 深拷贝，不然弹出后就修改了原标注信息
         pop_i = 0  # 去除每个关键点的置信度
         for k in range(21):
@@ -47,6 +47,7 @@ class label_it:
         self.annotations_list[self.index]["keypoints"] = keypoints
 
     def save_annotations(self, keypoints):
+        """每次加载下一张图片时，自动调用该函数保存当前图像的修改"""
         self.json_ann["info"]["image_index"] = self.index
         self.revise_annotation(keypoints)
         self.json_ann["annotations"] = self.annotations_list
@@ -57,6 +58,15 @@ class label_it:
             json.dump(self.json_ann, open(self.new_annotation_file, "w"), indent=4)
             print(self.new_annotation_file)
             print("save!!!")
+
+    def image_CheckState(self, index):
+        """判断该图像是否已经检查处理过，返回bool"""
+        if "CheckState" in self.images_list[index].keys():
+            check_state = self.images_list[index]["CheckState"]  # return PartiallyChecked or Checked
+        else:
+            check_state = "Unchecked"
+            self.images_list[index]["CheckState"] = check_state
+        return check_state
 
 
 if __name__ == '__main__':

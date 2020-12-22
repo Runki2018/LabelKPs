@@ -17,6 +17,8 @@ class my_kps_Item(QtWidgets.QListWidgetItem):
         self.set_myText(index, text)
         self.set_myTextColor(index)
         # self.set_myBackgroundColor(index)
+        # self.setCheckState(Qt.PartiallyChecked)
+        # self.setCheckState(Qt.Checked)
 
     def set_myText(self, index=0, text=""):
         """给列表项添加自定义项，包括图标和底色"""
@@ -49,9 +51,34 @@ class my_kps_Item(QtWidgets.QListWidgetItem):
 
 
 class my_files_Item(QtWidgets.QListWidgetItem):
-    def __init__(self):
+    def __init__(self, index, text):
         super(my_files_Item, self).__init__()
-        pass
+        self.set_myText(index, text)
+        self.set_myTextColor(index)
+        # self.setCheckState(Qt.PartiallyChecked)
+        self.setCheckState(Qt.Unchecked)
+
+    def set_myText(self, index=0, text=""):
+        """给列表项添加自定义项，包括图标和底色"""
+        self.setTextAlignment(Qt.AlignBottom)
+        font = QFont()
+        font.setBold(True)
+        self.setFont(font)  # 字体加粗
+        # text = str(index + 1) + ":" + text
+        # if index == 0:
+        #     finger = self.type_list[0]
+        # else:
+        #     index = (index - 1) // 4 + 1
+        #     finger = self.type_list[index]
+        # text = text + finger
+        self.setText(text)
+
+    def set_myTextColor(self, index):
+        if index == 0:
+            self.setTextColor(self.color[0])
+        else:
+            index = (index - 1) // 4 + 1
+            self.setTextColor(self.color[index])
 
 
 
