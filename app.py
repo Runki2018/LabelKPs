@@ -14,7 +14,8 @@ class my_UI:
 
     def __init__(self):
         # 加载 ui
-        ui_file_name = "./UI/labelKPs.ui"
+        # ui_file_name = "./UI/labelKPs.ui"
+        ui_file_name = "./UI/labelKPs_file.ui"
         ui_file = QFile(ui_file_name)
         if not ui_file.open(QIODevice.ReadOnly):
             print("Cannot open {}: {}".format(ui_file_name, ui_file.errorString()))
@@ -60,11 +61,12 @@ class my_UI:
         self.lineEdit = self.ui.lineEdit  # 输入框，用于输入将跳转的图片数
 
         # listWidget:
-        self.listWidget = self.ui.listWidget  # 显示当前关键点坐标的列表框
+        self.listWidget_points = self.ui.listWidget_points  # 显示当前关键点坐标的列表框
+        self.listWidget_files = self.ui.listWidget_files  # 显示图片文件的列表框
 
         # graphicsView:
         self.graphicsView = self.ui.graphicsView  # 图片框
-        self.scene = MyScene(self.listWidget)  # 场景
+        self.scene = MyScene(self.listWidget_points)  # 场景
         self.graphicsView.setScene(self.scene)
 
         # 定义事件
@@ -118,14 +120,14 @@ class my_UI:
 
     def init_listWidget(self, keypoints):
         self.points_list = []
-        self.listWidget.clear()
+        self.listWidget_points.clear()
         for k in range(21):
             ki = 2 * k
             keypoint = (round(keypoints[ki], 2), round(keypoints[ki + 1], 2))
             self.points_list.append(keypoint)
             item_text = str(keypoint)
             item = my_kps_Item(k, item_text)
-            self.listWidget.addItem(item)
+            self.listWidget_points.addItem(item)
 
     def init_graphicsView(self):
         img_path = self.load_dirpath + '/' + self.label.read_image()
@@ -163,7 +165,7 @@ class my_UI:
     def addItem(self, item):
         if not isinstance(item, my_kps_Item):
             raise TypeError("item must be LabelListWidgetItem")
-        self.listWidget.addItem(item)
+        self.listWidget_points.addItem(item)
 
     # def keypoints_from_listWidget(self):
     #     """从列表框获取关键点坐标"""

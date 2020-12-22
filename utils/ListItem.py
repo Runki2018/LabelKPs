@@ -48,6 +48,14 @@ class my_kps_Item(QtWidgets.QListWidgetItem):
             self.setTextColor(self.color[index])
 
 
+class my_files_Item(QtWidgets.QListWidgetItem):
+    def __init__(self):
+        super(my_files_Item, self).__init__()
+        pass
+
+
+
+
 # class HTMLDelegate(QtWidgets.QStyledItemDelegate):
 #     """  用HTML语言实现list里有颜色和可选框显示的listItem
 #         http://pyside.digitser.net/5.15/zh-CN/PySide2/QtWidgets/QStyledItemDelegate.html
