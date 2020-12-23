@@ -4,8 +4,7 @@ import sys
 from PySide2.QtCore import QFile, QIODevice, QSize
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QFileDialog
-from utils.ListItem import my_kps_Item
-from utils.ListItem import my_kps_Item
+from utils.ListItem import my_kps_Item, my_files_Item
 from utils.my_scene import MyScene
 from utils.label import label_it
 from PySide2.QtGui import QPixmap, QIcon
@@ -86,7 +85,8 @@ class my_UI:
         self.save_file = ""
         self.img_number = 0  # 图片总数
         self.index = 0  # 已处理的图片数
-        self.points_list = []  # 当前手的关键点列表
+        self.points_list = []  # 当前手的关键点列表（未经修改）
+        # self.raw_points_list = []  # 未经修改的关键点列表
 
     def load_dir(self):
         self.load_dirpath = QFileDialog.getExistingDirectory(self.ui, "选择图片加载目录", './')
@@ -106,6 +106,7 @@ class my_UI:
             self.label = label_it(self.save_file)
             self.img_number = self.label.image_number
             self.update_widget()
+            self.init_listWidget_files()  # 初始化文件列表，只初始化一次
             self.preButton.setEnabled(True)
             self.nextButton.setEnabled(True)
             self.goButton.setEnabled(True)
@@ -114,6 +115,7 @@ class my_UI:
             self.hintBox.setText("提示：未选择标注文件！")
 
     def update_widget(self):
+        """更新控件：显示当前图片数的标签、绘图框、关键点列表"""
         text = "图片数：" + str(self.label.index + 1) + "/" + str(self.img_number)
         self.process_number.setText(text)
         self.init_listWidget_points(self.label.get_raw_keypoints())
@@ -131,17 +133,32 @@ class my_UI:
             self.listWidget_points.addItem(item)
 
     def init_graphicsView(self):
+        """更新图像框图像和关键点，必须在更新关键点列表后执行"""
         img_path = self.load_dirpath + '/' + self.label.get_imagePath()
         print(img_path)
-        self.scene.init_scene(img_path, self.points_list)
+        self.scene.init_scene(img_path, self.points_list.copy())  # 深拷贝 -> 值传递，后面对比二者是否不同
 
     def init_listWidget_files(self):
         """初始化files框列表项"""
+        self.listWidget_files.clear()
         images_list = self.label.images_list
         for i, img_info in enumerate(images_list):
             item_text = img_info["file_name"]
             check_state = self.label.image_CheckState(i)
-            item = my_kps_Item(k, item_text)
+            item = my_files_Item(i, check_state, item_text)
+            self.listWidget_files.addItem(item)
+
+    def set_CheckState(self, new_keypoints):
+        """设置当前文件的检查状态,查看scene坐标与读入的初始坐标是否一致，一致则未修改，否则就修改过"""
+        file_item = self.listWidget_files.item(self.label.index)
+        for i, k in enumerate(new_keypoints):
+            if k != self.points_list[i]:   # (x1,y1) != (x1',y1') ?
+                self.label.set_image_CheckState("Checked")
+                file_item.set_myCheckState("Checked")
+                break
+        if self.label.image_CheckState(self.label.index) != "Checked":
+            self.label.set_image_CheckState("PartiallyChecked")
+            file_item.set_myCheckState("PartiallyChecked")
 
     def pre_img(self):
         # x = self.ui.graphicsView
@@ -153,10 +170,10 @@ class my_UI:
     def next_img(self):
         # 保持上一张图片标注信息，并将index+1, 当index合理时，才更新下一张图片
         self.hintBox.setText("提示：下一页！")
-        # self.label.save_annotations(self.keypoints_from_listWidget())
         keypoints = []
         for kp_tuple in self.scene.keypoints:
             keypoints.extend(kp_tuple)   # [(x1,y1)] -> [x1,y1]
+        self.set_CheckState(self.scene.keypoints)
         self.label.save_annotations(keypoints)
         if self.label.index < self.img_number:
             self.update_widget()
@@ -171,10 +188,10 @@ class my_UI:
         else:
             self.hintBox.setText("提示：非法跳转！")
 
-    def addItem(self, item):
-        if not isinstance(item, my_kps_Item):
-            raise TypeError("item must be LabelListWidgetItem")
-        self.listWidget_points.addItem(item)
+    # def addItem(self, item):
+    #     if not isinstance(item, my_kps_Item):
+    #         raise TypeError("item must be LabelListWidgetItem")
+    #     self.listWidget_points.addItem(item)
 
 
 

@@ -51,6 +51,7 @@ class label_it:
         self.json_ann["info"]["image_index"] = self.index
         self.revise_annotation(keypoints)
         self.json_ann["annotations"] = self.annotations_list
+        self.json_ann["images"] = self.images_list
         if self.index < self.image_number:
             print("index = ", self.index)
             self.index += 1 if self.index < self.image_number - 1 else 0
@@ -67,6 +68,10 @@ class label_it:
             check_state = "Unchecked"
             self.images_list[index]["CheckState"] = check_state
         return check_state
+
+    def set_image_CheckState(self, check_state):
+        """三种状态：未检查、已检查未修改、已检查且修改"""
+        self.images_list[self.index]["CheckState"] = check_state
 
 
 if __name__ == '__main__':

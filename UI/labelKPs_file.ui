@@ -26,10 +26,10 @@
          <bool>true</bool>
         </property>
         <property name="frameShape">
-         <enum>QFrame::VLine</enum>
+         <enum>QFrame::StyledPanel</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
+         <enum>QFrame::Sunken</enum>
         </property>
        </widget>
       </item>
@@ -181,7 +181,7 @@
         <enum>QTabWidget::Triangular</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -208,11 +208,26 @@
            <property name="title">
             <string>加载和保存</string>
            </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
            <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
              <widget class="QPushButton" name="loadButton">
               <property name="text">
                <string>图片加载目录</string>
+              </property>
+              <property name="checkable">
+               <bool>false</bool>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
+              <property name="default">
+               <bool>false</bool>
+              </property>
+              <property name="flat">
+               <bool>false</bool>
               </property>
              </widget>
             </item>
@@ -231,7 +246,29 @@
            <property name="title">
             <string>操作类型</string>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_7">
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="flat">
+            <bool>false</bool>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetMinimumSize</enum>
+            </property>
+            <item>
+             <widget class="QRadioButton" name="radioButton_BBox">
+              <property name="text">
+               <string>边界框</string>
+              </property>
+              <property name="autoRepeat">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
             <item>
              <widget class="QRadioButton" name="radioButton_KPs">
               <property name="text">
@@ -239,13 +276,6 @@
               </property>
               <property name="checked">
                <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="radioButton_BBox">
-              <property name="text">
-               <string>边界框</string>
               </property>
              </widget>
             </item>
@@ -274,8 +304,14 @@
          </item>
          <item>
           <widget class="QLabel" name="label_caption">
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
            <property name="text">
             <string>TextLabel</string>
+           </property>
+           <property name="scaledContents">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -288,10 +324,19 @@
             </size>
            </property>
            <property name="text">
-            <string>TextLabel</string>
+            <string/>
+           </property>
+           <property name="pixmap">
+            <pixmap>C:/Users/WISE &amp; BRAVE/Desktop/Example_n.png</pixmap>
            </property>
            <property name="scaledContents">
             <bool>true</bool>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -309,11 +354,6 @@
           </spacer>
          </item>
         </layout>
-       </widget>
-       <widget class="QWidget" name="tab">
-        <attribute name="title">
-         <string>进度</string>
-        </attribute>
        </widget>
       </widget>
      </item>
@@ -333,6 +373,9 @@
       <widget class="QGroupBox" name="GBkps">
        <property name="title">
         <string>关键点坐标</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
@@ -649,22 +692,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_loadDir</sender>
-   <signal>triggered()</signal>
-   <receiver>loadButton</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>141</x>
-     <y>139</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>action_labelfile</sender>
    <signal>triggered()</signal>
    <receiver>saveButton</receiver>
@@ -677,6 +704,22 @@
     <hint type="destinationlabel">
      <x>141</x>
      <y>182</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_loadDir</sender>
+   <signal>triggered()</signal>
+   <receiver>loadButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>141</x>
+     <y>139</y>
     </hint>
    </hints>
   </connection>

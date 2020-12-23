@@ -51,12 +51,10 @@ class my_kps_Item(QtWidgets.QListWidgetItem):
 
 
 class my_files_Item(QtWidgets.QListWidgetItem):
-    def __init__(self, index, text):
+    def __init__(self, index, check_state, text):
         super(my_files_Item, self).__init__()
         self.set_myText(index, text)
-        self.set_myTextColor(index)
-        # self.setCheckState(Qt.PartiallyChecked)
-        self.setCheckState(Qt.Unchecked)
+        self.set_myCheckState(check_state)
 
     def set_myText(self, index=0, text=""):
         """给列表项添加自定义项，包括图标和底色"""
@@ -64,22 +62,18 @@ class my_files_Item(QtWidgets.QListWidgetItem):
         font = QFont()
         font.setBold(True)
         self.setFont(font)  # 字体加粗
-        # text = str(index + 1) + ":" + text
-        # if index == 0:
-        #     finger = self.type_list[0]
-        # else:
-        #     index = (index - 1) // 4 + 1
-        #     finger = self.type_list[index]
-        # text = text + finger
         self.setText(text)
 
-    def set_myTextColor(self, index):
-        if index == 0:
-            self.setTextColor(self.color[0])
+    def set_myCheckState(self, check_state):
+        """设置该列表项的检查状态"""
+        if check_state == "Unchecked":
+            self.setCheckState(Qt.Unchecked)
+        elif check_state == "PartiallyChecked":
+            self.setCheckState(Qt.PartiallyChecked)
+        elif check_state == "Checked":
+            self.setCheckState(Qt.Checked)
         else:
-            index = (index - 1) // 4 + 1
-            self.setTextColor(self.color[index])
-
+            print(" set_myCheckState() Error !")
 
 
 
