@@ -381,22 +381,6 @@
         <item>
          <widget class="QListWidget" name="listWidget_points"/>
         </item>
-        <item>
-         <widget class="QLabel" name="hint">
-          <property name="autoFillBackground">
-           <bool>false</bool>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Panel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-          <property name="text">
-           <string>提示：</string>
-          </property>
-         </widget>
-        </item>
        </layout>
       </widget>
      </item>

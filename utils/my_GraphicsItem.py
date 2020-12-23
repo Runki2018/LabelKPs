@@ -6,7 +6,7 @@ from PySide2.QtWidgets import QStyleOptionGraphicsItem, QGraphicsEllipseItem
 
 class my_item(QGraphicsItem):
     """
-    为GraphicsView的场景实现一个画关键点的自定义图元
+    为GraphicsView的场景实现一个画关键点的自定义图元, 现在没被采用。
     场景通过boundingRect()和shape()决定图元的位置和交互。
     API 参考：
     http://pyside.digitser.net/5.15/zh-CN/PySide2/QtWidgets/

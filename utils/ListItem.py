@@ -9,7 +9,7 @@ class my_kps_Item(QtWidgets.QListWidgetItem):
     """
         给关键点列表添加实现自己的关键点项
     """
-    type_list = ["\t手腕", "\t拇指", "\t食指", "\t中指", "\t无名指", "\t小指"]
+    type_list = ["手腕", "拇指", "食指", "中指", "无名指", "小指"]
     color = [Qt.red, QColor(64, 224, 208), Qt.magenta, QColor(222, 96, 27), Qt.blue, Qt.green]
 
     def __init__(self, index=0, text=None):
@@ -32,7 +32,7 @@ class my_kps_Item(QtWidgets.QListWidgetItem):
         else:
             index = (index - 1) // 4 + 1
             finger = self.type_list[index]
-        text = text + finger
+        text = finger + "\t" + text
         self.setText(text)
 
     def set_myBackgroundColor(self, index):
@@ -62,6 +62,7 @@ class my_files_Item(QtWidgets.QListWidgetItem):
         font = QFont()
         font.setBold(True)
         self.setFont(font)  # 字体加粗
+        text = str(index + 1) + ": " + text
         self.setText(text)
 
     def set_myCheckState(self, check_state):
