@@ -159,7 +159,11 @@
    <addaction name="menu_2"/>
    <addaction name="menu_3"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+  </widget>
   <widget class="QDockWidget" name="dockWidget_1">
    <property name="windowTitle">
     <string>option</string>
