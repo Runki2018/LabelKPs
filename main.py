@@ -1,13 +1,13 @@
 
 import sys
 from PySide2.QtWidgets import QApplication, QMainWindow
-from app import my_UI
+from app import myGUI
 
 
 def main():
     app = QApplication(sys.argv)
-    window = my_UI()  # 一定要创建类的实例，才能调用实例方法
-    window.ui.show()
+    GUI = myGUI()  # 一定要创建类的实例，才能调用实例方法
+    GUI.ui.show()
     sys.exit(app.exec_())
 
 
