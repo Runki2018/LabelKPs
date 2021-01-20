@@ -1,2 +1,2 @@
 # LabelKPs
- An annotation tool for key points 
+ An annotation tool for keypoints 
