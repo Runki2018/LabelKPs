@@ -3,14 +3,15 @@ import sys
 
 from PySide2.QtCore import QFile, QIODevice, Qt
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QFileDialog, QLabel
+from PySide2.QtWidgets import QFileDialog, QLabel, QMessageBox
 from utils.ListItem import my_kps_Item, my_files_Item
 from utils.my_scene import MyScene
 from utils.label import label_it
-from PySide2.QtGui import QPixmap, QIcon
+from PySide2.QtGui import QPixmap, QIcon, QCloseEvent
 
 
-class my_UI:
+class myGUI:
+    """app类，除了画布场景的操作，其余控件操作在该类定义。"""
 
     def __init__(self):
         # 加载 ui
@@ -28,6 +29,7 @@ class my_UI:
 
         # self.ui = QUiLoader().load("./UI/labelKPs.ui")
         self.ui.setWindowIcon(QIcon('hand_icon.ico'))
+
         # 定义控件，方便补全代码
         self.statusBar = self.ui.statusbar  # 状态条，用于显示提示信息，可设置信息时效ms
         self.statusLabel = QLabel("源码：")
@@ -38,7 +40,9 @@ class my_UI:
 
         # button:
         self.loadButton = self.ui.loadButton  # 图片加载目录
-        self.saveButton = self.ui.saveButton  # 标注保存目录
+        self.jsonButton = self.ui.jsonButton  # 选择json标注文件
+        self.jsonButton.setEnabled(False)
+        self.saveButton = self.ui.saveButton  # 保存标注——当图片数量大的时候，保存时间较慢，有几秒。
         self.saveButton.setEnabled(False)
         self.preButton = self.ui.preButton  # 上一张
         self.preButton.setEnabled(False)
@@ -50,6 +54,24 @@ class my_UI:
         # radiobutton:
         # self.bbox_radioButton = self.ui.bbox_radioButton  # 画边界框单选框
         # self.kps_radioButton = self.ui.kps_radioButton  # 画关键点单选框
+        self.show_radioButton = self.ui.radioButton_show  # 显示骨架
+        self.hide_radioButton = self.ui.radioButton_hide  # 隐藏骨架
+
+        # listWidget:
+        self.listWidget_points = self.ui.listWidget_points  # 显示当前关键点坐标的列表框
+        self.listWidget_files = self.ui.listWidget_files  # 显示图片文件的列表框
+
+        # graphicsView:
+        self.graphicsView = self.ui.graphicsView  # 图片框
+        self.scene = MyScene(self.listWidget_points)  # 场景，把列表控件传入，便于更新列表项，也可以用信号进制实现
+        self.graphicsView.setScene(self.scene)
+
+        # 滚动条
+        self.scrollBar = self.ui.horizontalScrollBar  # 用于调整骨架线条的粗细或透明度
+        self.scrollBar.setMaximum(20)  # length = Max - Min + PageStep
+        self.scrollBar.setMinimum(1)
+        self.scrollBar.setPageStep(1)
+        self.scrollBar.setValue(self.scene.bonePen_width)  # 设滚动条初始位置 与 场景骨架笔宽初始值一致
 
         # label:
         self.process_number = self.ui.number_label  # 显示当前已处理的图片数/总图片数
@@ -63,22 +85,16 @@ class my_UI:
         # lineEdit
         self.lineEdit = self.ui.lineEdit  # 输入框，用于输入将跳转的图片数
 
-        # listWidget:
-        self.listWidget_points = self.ui.listWidget_points  # 显示当前关键点坐标的列表框
-        self.listWidget_files = self.ui.listWidget_files  # 显示图片文件的列表框
-
-        # graphicsView:
-        self.graphicsView = self.ui.graphicsView  # 图片框
-        self.scene = MyScene(self.listWidget_points)  # 场景
-        self.graphicsView.setScene(self.scene)
-
         # 定义事件
         self.loadButton.clicked.connect(self.load_dir)  # 加载图片文件夹
-        self.saveButton.clicked.connect(self.save_dir)  # 选着保存文件夹
+        self.jsonButton.clicked.connect(self.chooseLabelFile)  # 选择标注文件
+        self.saveButton.clicked.connect(self.save_label)  # 保存标注文件
         self.preButton.clicked.connect(self.pre_img)  # 上一张图片
         self.nextButton.clicked.connect(self.next_img)  # 下一张图片
         self.goButton.clicked.connect(self.go_img)  # 下一张图片
-
+        self.show_radioButton.clicked.connect(self.showBoneLine)  # 显示骨架
+        self.hide_radioButton.clicked.connect(self.hideBoneLine)  # 隐藏骨架
+        self.scrollBar.valueChanged.connect(self.scrollEvent)  # 调整骨架粗细
 
         # 加载和保持标注信息
         self.label = None
@@ -89,19 +105,18 @@ class my_UI:
         self.img_number = 0  # 图片总数
         self.index = 0  # 已处理的图片数
         self.points_list = []  # 当前手的关键点列表（未经修改）
-        # self.raw_points_list = []  # 未经修改的关键点列表
 
     def load_dir(self):
         self.load_dirpath = QFileDialog.getExistingDirectory(self.ui, "选择图片加载目录", './')
         if self.load_dirpath != "":
-            self.saveButton.setEnabled(True)  # 只有选择了图像加载路径后，才能选择标注保持路径
+            self.jsonButton.setEnabled(True)  # 只有选择了图像加载路径后，才能选择标注保持路径
             self.statusBar.showMessage("提示:" + self.load_dirpath, 3000)
         else:
             self.statusBar.showMessage("提示：加载目录为空！", 3000)
         print("load images directory!")
         print(self.load_dirpath)
 
-    def save_dir(self):
+    def chooseLabelFile(self):
         self.save_file, _ = QFileDialog.getOpenFileName(self.ui, "选择标注文件", './', 'JSON files(*.json)')
         print("save images directory!")
         print(self.save_file)
@@ -110,6 +125,7 @@ class my_UI:
             self.img_number = self.label.image_number
             self.init_listWidget_files()  # 初始化文件列表，只初始化一次
             self.update_widget()
+            self.saveButton.setEnabled(True)
             self.preButton.setEnabled(True)
             self.nextButton.setEnabled(True)
             self.goButton.setEnabled(True)
@@ -176,11 +192,35 @@ class my_UI:
         self.statusBar.showMessage("下一页！", 3000)
         keypoints = []
         for kp_tuple in self.scene.keypoints:
-            keypoints.extend(kp_tuple)   # [(x1,y1)] -> [x1,y1]
+            keypoints.extend(kp_tuple)   # [(x1,y1),(x2,y2)] -> [x1,y1,x2,y2]
         self.set_CheckState(self.scene.keypoints)
-        self.label.save_annotations(keypoints)
+        # self.label.save_annotations(keypoints)
+        self.label.update_label(keypoints)
         if self.label.index < self.img_number:
             self.update_widget()
+
+    def save_label(self):
+        self.statusBar.showMessage("正在保存文件。。。", 3000)
+        keypoints = []
+        for kp_tuple in self.scene.keypoints:
+            keypoints.extend(kp_tuple)   # [(x1,y1),(x2,y2)] -> [x1,y1,x2,y2]
+        self.set_CheckState(self.scene.keypoints)
+        self.label.update_label(keypoints)
+        self.label.save_annotations()
+
+    def closeEvent(self):
+        """在关闭窗口时弹出对话框"""
+        option = QMessageBox.Question(self,
+                                      "LabelKPs", "是否要退出程序？",
+                                      QMessageBox.Yes | QMessageBox.No,
+                                      QMessageBox.No)
+        if option == QMessageBox.Yes:
+            if self.label is not None:
+                self.save_label()
+            # event.accept()
+        else:
+            # event.ignore()
+            print("NONONONONON")
 
     def go_img(self):
         """跳转到指定图像"""
@@ -193,8 +233,21 @@ class my_UI:
         else:
             self.statusBar.showMessage("提示：非法跳转！", 3000)
 
+    def showBoneLine(self):
+        """骨架连线可见性改变时触发该事件,给场景更新状态"""
+        self.statusBar.showMessage("显示骨架！", 2000)
+        self.scene.app_signal[str].emit("show")
 
+    def hideBoneLine(self):
+        """骨架连线可见性改变时触发该事件,给场景更新状态"""
+        self.statusBar.showMessage("隐藏骨架！", 2000)
+        self.scene.app_signal[str].emit("hide")
 
-
-
+    def scrollEvent(self):
+        """水平滚动条，调整骨架粗细或透明度"""
+        self.statusBar.showMessage("调整骨架粗细...", 1000)
+        print("app value = ", self.scrollBar.value())
+        print(type(self.scrollBar.value()))
+        print(type(1))
+        self.scene.app_signal[int].emit(self.scrollBar.value())
 

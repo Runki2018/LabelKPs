@@ -6,7 +6,7 @@ class label_it:
     """读取粗略的标注信息"""
 
     def __init__(self, annotation_file):
-        self.new_annotation_file = "annotation" + \
+        self.new_annotation_file = "label_" + \
                                    time.strftime("%Y-%m-%d", time.localtime()) + ".json"
         self.json_ann = json.load(open(annotation_file, "r"))
         self.annotations_list = self.json_ann["annotations"]
@@ -30,7 +30,7 @@ class label_it:
 
     def get_raw_keypoints(self):
         """获取粗略的关键点坐标"""
-        keypoints = self.annotations_list[self.index]["keypoints"].copy()  # 深拷贝，不然弹出后就修改了原标注信息
+        keypoints = self.annotations_list[self.index]["keypoints"].copy()  # 深拷贝，不然pop后就修改了原标注信息
         pop_i = 0  # 去除每个关键点的置信度
         for k in range(21):
             pop_i += 2
@@ -38,27 +38,42 @@ class label_it:
         return keypoints
 
     def revise_annotation(self, keypoints):
-        """修改某一个图像的关键点标注"""
-        # 给修改后的每个关键点增加置信度为1
+        """修改某一个图像的关键点标注,给修改后的每个关键点增加置信度为 1"""
         insert_i = -1
         for i in range(21):
             insert_i += 3
             keypoints.insert(insert_i, 1)
         self.annotations_list[self.index]["keypoints"] = keypoints
 
-    def save_annotations(self, keypoints):
-        """每次加载下一张图片时，自动调用该函数保存当前图像的修改"""
-        self.json_ann["info"]["image_index"] = self.index
+    def update_label(self, keypoints):
         self.revise_annotation(keypoints)
-        self.json_ann["annotations"] = self.annotations_list
-        self.json_ann["images"] = self.images_list
         if self.index < self.image_number:
             print("index = ", self.index)
             self.index += 1 if self.index < self.image_number - 1 else 0
             print("index = ", self.index)
-            json.dump(self.json_ann, open(self.new_annotation_file, "w"), indent=4)
-            print(self.new_annotation_file)
-            print("save!!!")
+
+    def save_annotations(self):
+        """每次加载下一张图片时，自动调用该函数保存当前图像的修改"""
+        self.json_ann["info"]["image_index"] = self.index
+        self.json_ann["annotations"] = self.annotations_list
+        self.json_ann["images"] = self.images_list
+        json.dump(self.json_ann, open(self.new_annotation_file, "w"), indent=4)
+        print(self.new_annotation_file)
+        print("save!!!")
+
+    # def save_annotations(self, keypoints):
+    #     """每次加载下一张图片时，自动调用该函数保存当前图像的修改"""
+    #     self.json_ann["info"]["image_index"] = self.index
+    #     self.revise_annotation(keypoints)
+    #     self.json_ann["annotations"] = self.annotations_list
+    #     self.json_ann["images"] = self.images_list
+    #     if self.index < self.image_number:
+    #         print("index = ", self.index)
+    #         self.index += 1 if self.index < self.image_number - 1 else 0
+    #         print("index = ", self.index)
+    #         json.dump(self.json_ann, open(self.new_annotation_file, "w"), indent=4)
+    #         print(self.new_annotation_file)
+    #         print("save!!!")
 
     def image_CheckState(self, index):
         """判断该图像是否已经检查处理过，返回bool"""

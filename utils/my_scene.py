@@ -1,6 +1,6 @@
 import math
 from PySide2.QtCore import (QCoreApplication, QDate, QDateTime, QMetaObject,
-                            QObject, QPoint, QRect, QSize, QTime, QUrl, Qt)
+                            QObject, QPoint, QRect, QSize, QTime, QUrl, Qt, Signal, Slot)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
                            QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter,
                            QPixmap, QTransform, QRadialGradient, QPen, QPainterPath)
@@ -15,9 +15,12 @@ class MyScene(QGraphicsScene):
     # 6种颜色，分别是手腕1，拇指4，食指4，中指4，无名指4，小指4的关键点颜色
     point_color = [Qt.red, Qt.cyan, Qt.magenta, QColor(222, 96, 27), Qt.blue, Qt.green]  # 预设笔的颜色
     pen_width = 1  # 预设笔的宽度
+    bonePen_width = 4  # 骨架线的笔宽
     wh_const = 10  # 关键点大小的常量一直保存不变
     wh = 10  # 当前关键点的大小
     scaleRatio = 1  # 图像缩放的比例
+    # str 是调整骨架可见性；int 是滑轮调整值，用于调整骨架透明度或粗细
+    app_signal = Signal((str,), (int,))  # 接收从app发送过来的信号，每次只能接收str或int 类型的一种信号
 
     def __init__(self, listWidget):  # 初始函数
         super(MyScene, self).__init__()  # 实例化QGraphicsScene
@@ -28,6 +31,8 @@ class MyScene(QGraphicsScene):
 
         self.keypoints = []   # 关键点坐标元组组成的列表
         self.points_list = []  # 关键点图元组成的列表
+        self.boneLine_list = []  # 关键点连线
+        self.boneLine_isVisible = True  # 默认关键点连线是可见状态
         self.current_point = ""
         self.image = None   # 单独存储原始图像，用于后面的缩放保持质量，每次缩放基于原图。
         self.my_pixmap_item = None
@@ -35,22 +40,27 @@ class MyScene(QGraphicsScene):
         self.coordinate = (0, 0)  # 鼠标所在的场景坐标
         self.acceptMove = False  # 是否选中点进行移动的标记
         self.move = False  # 是否发生过移动
+        self.app_signal[str].connect(self.change_BL_visible)  # 接收从app中单选健发送的str信号
+        self.app_signal[int].connect(self.change_BL_bold)  # 接收从app中滚动条发送的int信号
 
     def init_scene(self, img_path, keypoints):
-        # 先清空当前所有的图元Item
+        # 1、先清空当前所有的图元Item
         if self.points_list:
             self.points_list = []
+            self.boneLine_list = []
             self.current_point = ""
             for item in self.items():
                 self.removeItem(item)
-        # 读入图片，并将图片的大小设置为scene的大小
+        # 2、读入图片，并将图片的大小设置为scene的大小
         self.image = QPixmap(img_path)  # 单独存储原始图像，用于后面的缩放保持质量，每次缩放基于原图。
         self.my_pixmap_item = self.addPixmap(self.image)
         self.w, self.h = self.image.size().toTuple()  # 场景的大小 = Pixmap图元的大小
         w, h = self.image.size().toTuple()  # 场景的大小 = Pixmap图元的大小
         self.setSceneRect(QRect(0, 0, w, h))  # 设置场景起始及大小，默认场景是中心为起始，不方便后面的代码
-        # 添加关键点图元
+        # 3、连线——手的骨架, 注意一定要先画线，后画点，使点绘制在最上层，不被线遮挡。
         self.keypoints = keypoints
+        self.initBoneLine()
+        # 4、添加关键点图元
         for i, (x, y) in enumerate(keypoints):
             self.addPoint(i, x, y)
 
@@ -84,6 +94,68 @@ class MyScene(QGraphicsScene):
         self.current_point = self.addEllipse(lx, ly, self.wh, self.wh, self.pen, brush)
         self.points_list.append(self.current_point)
 
+    def initBoneLine(self):
+        """画骨骼线"""
+        for i in range(20):  # 21个点 -> 20条线
+            pen = QPen()    # 1、设置线的颜色
+            color_index = i // 4 + 1
+            pen.setColor(self.point_color[color_index])
+            pen.setWidth(self.bonePen_width)
+            if i % 4 == 0:  # 2、获取线的两个端点坐标
+                x1, y1 = self.keypoints[0]  # 起始点为手腕点
+            else:
+                x1, y1 = self.keypoints[i]
+            x2, y2 = self.keypoints[i+1]
+            line = self.addLine(x1, y1, x2, y2, pen)
+            if not self.boneLine_isVisible:
+                line.hide()
+            self.boneLine_list.append(line)
+
+    def updateBoneLine(self, x, y):
+        """在移动一个关键点后，更新相应的连线"""
+        i = self.points_list.index(self.current_point)
+        # print("i = ", i)
+        if i == 0:  # 手腕点移动会影响四条线
+            for index in range(0, 17, 4):
+                boneline = self.boneLine_list[index]
+                x1, y1, x2, y2 = boneline.line().toTuple()
+                boneline.setLine(x, y, x2, y2)
+        elif i % 4 == 0:  # 指尖点
+            boneline = self.boneLine_list[i-1]
+            x1, y1, x2, y2 = boneline.line().toTuple()
+            boneline.setLine(x1, y1, x, y)
+        else:   # 中间点移动影响两条线
+            boneline = self.boneLine_list[i-1]
+            x1, y1, x2, y2 = boneline.line().toTuple()
+            boneline.setLine(x1, y1, x, y)
+            boneline = self.boneLine_list[i]
+            x1, y1, x2, y2 = boneline.line().toTuple()
+            boneline.setLine(x, y, x2, y2)
+
+    @Slot(str)
+    def change_BL_visible(self, state):
+        """改变关键点连线的可见性"""
+        if state == "hide" and self.boneLine_isVisible:
+            for boneline in self.boneLine_list:
+                boneline.hide()
+                self.boneLine_isVisible = False
+        elif state == "show" and not self.boneLine_isVisible:
+            for boneline in self.boneLine_list:
+                # boneline.setVisible(True)
+                boneline.show()
+                self.boneLine_isVisible = True
+
+    @Slot(int)
+    def change_BL_bold(self, value):
+        """改变骨架粗细"""
+        print("value = ", value)
+        for boneline in self.boneLine_list:
+            pen = boneline.pen()
+            self.bonePen_width = value
+            pen.setWidth(value)
+            boneline.setPen(pen)
+            self.update()
+
     def mousePressEvent(self, event):  # 重载鼠标事件
         pos = event.scenePos()  # 当前鼠标事件发生的场景坐标QPointF(x,y)
         x, y = pos.toTuple()
@@ -108,8 +180,9 @@ class MyScene(QGraphicsScene):
                 self.wh = self.wh_const  # 释放后缩小关键点
                 lx, ly = self.center2LeftTop(x, y)
                 self.current_point.setRect(QRect(lx, ly, self.wh, self.wh))
+                self.updateBoneLine(x, y)
                 self.acceptMove = False
-                self.changeKeyPoints(x, y)
+                self.changeKeyPoints(x, y)  # 将更改后的坐标映射回原图
                 self.update_listItem(x, y)  # 更新列表框中的关键点坐标数值
                 self.update()
 
@@ -148,25 +221,20 @@ class MyScene(QGraphicsScene):
             Qt.IgnoreAspectRatio,
             Qt.SmoothTransformation))
         self.update()
-        self.update_points_pos()
+        self.update_ItemPos()
 
-    def update_points_pos(self):
-        """缩放场景和PixmapItem后，需要更新图中关键点Item的位置"""
+    def update_ItemPos(self):
+        """缩放场景和PixmapItem后，更新图中关键点和骨架连线的图元位置"""
         sr = self.width() / self.w
-        print("sr = ", sr)
+        # print("sr = ", sr)
         for i, point in enumerate(self.points_list):
             x, y = self.keypoints[i]
-            x *= sr
-            y *= sr
+            x, y = x*sr, y*sr
             lx, ly = self.center2LeftTop(x, y)
-            # # 取整，调整精度，否则关键点再多次缩放后会发生点的偏移
-            # if self.scaleRatio > 1:
-            #     lx, ly = math.ceil(lx), math.ceil(ly)
-            # else:
-            #     lx, ly = math.floor(lx), math.floor(ly)
             w, h = self.wh, self.wh
             point.setRect(QRect(lx, ly, w, h))
             self.current_point = point
+            self.updateBoneLine(x, y)
             self.update_listItem(x, y)
             self.update()
 
@@ -178,10 +246,11 @@ class MyScene(QGraphicsScene):
 
     def mouseMoveEvent(self, event):  # 重载鼠标移动事件
         if self.acceptMove:
-            print("move !!!!!!")
+            # print("move !!!!!!")
             x, y = event.scenePos().toTuple()
             lx, ly = self.center2LeftTop(x, y)
             self.current_point.setRect(QRect(lx, ly, self.wh, self.wh))
+            self.updateBoneLine(x, y)
             self.move = True
 
     def mouseReleaseEvent(self, event):  # 重载鼠标松开事件
