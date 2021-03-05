@@ -54,7 +54,7 @@
           <item>
            <widget class="QCheckBox" name="is_occlusion">
             <property name="text">
-             <string>部分可见</string>
+             <string>遮挡</string>
             </property>
             <property name="checked">
              <bool>true</bool>
