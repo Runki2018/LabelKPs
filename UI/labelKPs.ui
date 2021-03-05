@@ -52,9 +52,9 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="checkBox">
+           <widget class="QCheckBox" name="is_occlusion">
             <property name="text">
-             <string>遮挡</string>
+             <string>部分可见</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -343,12 +343,6 @@
           </widget>
          </item>
         </layout>
-       </widget>
-       <widget class="QWidget" name="tab_3">
-        <attribute name="title">
-         <string>骨架</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_7"/>
        </widget>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
@@ -757,22 +751,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_labelfile</sender>
-   <signal>triggered()</signal>
-   <receiver>jsonButton</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>141</x>
-     <y>182</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>action_loadDir</sender>
    <signal>triggered()</signal>
    <receiver>loadButton</receiver>
@@ -801,6 +779,22 @@
     <hint type="destinationlabel">
      <x>154</x>
      <y>201</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_labelfile</sender>
+   <signal>triggered()</signal>
+   <receiver>jsonButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>141</x>
+     <y>182</y>
     </hint>
    </hints>
   </connection>

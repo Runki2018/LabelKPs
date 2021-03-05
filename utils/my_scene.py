@@ -18,7 +18,7 @@ class MyScene(QGraphicsScene):
     bonePen_width = 4  # 骨架线的笔宽
     wh_const = 10  # 关键点大小的常量一直保存不变
     wh = 10  # 当前关键点的大小
-    scaleRatio = 1  # 图像缩放的比例
+    scaleRatio = 1  # 图像缩放的比例 = 当前图片宽高 / 原图宽高， 这里处理图片宽=高
     # str 是调整骨架可见性；int 是滑轮调整值，用于调整骨架透明度或粗细
     app_signal = Signal((str,), (int,))  # 接收从app发送过来的信号，每次只能接收str或int 类型的一种信号
 
@@ -44,11 +44,14 @@ class MyScene(QGraphicsScene):
         self.app_signal[int].connect(self.change_BL_bold)  # 接收从app中滚动条发送的int信号
 
     def init_scene(self, img_path, keypoints):
+        """每次切换图片时，初始化场景"""
         # 1、先清空当前所有的图元Item
         if self.points_list:
             self.points_list = []
             self.boneLine_list = []
-            self.current_point = ""
+            self.current_point = None
+            self.acceptMove = False
+            self.wh = self.wh_const
             for item in self.items():
                 self.removeItem(item)
         # 2、读入图片，并将图片的大小设置为scene的大小
@@ -63,6 +66,12 @@ class MyScene(QGraphicsScene):
         # 4、添加关键点图元
         for i, (x, y) in enumerate(keypoints):
             self.addPoint(i, x, y)
+        # # 5、设置缩放比， 现在的图片一般是224x224 或 256x256,都比较小，因此加载后面的图片保存前面图片的缩放比例，减少手动缩放操作。
+        # self.my_pixmap_item.setPixmap(self.image.scaled(
+        #     QSize(self.width()*self.scaleRatio, self.height()*self.scaleRatio),
+        #     Qt.IgnoreAspectRatio,
+        #     Qt.SmoothTransformation))
+        # self.update_ItemPos()
 
     def center2LeftTop(self, x, y):
         """QGraphicsEllipseItem绘制时输入的是左上角的坐标"""
@@ -204,16 +213,13 @@ class MyScene(QGraphicsScene):
         if delta > 0:  # 滚轮向前滑动，delta= 120 >0 ，反之为 -120
             scene_width_new = math.ceil(self.width() * 1.1)
             scene_height_new = math.ceil(self.height() * 1.1)
-            self.scaleRatio = 1.1
         else:
             scene_width_new = math.floor(self.width() * 0.9)
             scene_height_new = math.floor(self.height() * 0.9)
-            self.scaleRatio = 0.9
             # 已知bug，当缩放的过小，如消失后，图像不能再放大。这个可以最小缩放值来限制。
             if scene_width_new / self.w < 0.5:
                 scene_width_new = self.width()
                 scene_height_new = self.height()
-                self.scaleRatio = 1
         # print(scene_width_new, scene_height_new)
         self.setSceneRect(QRect(0, 0, scene_width_new, scene_height_new))
         self.my_pixmap_item.setPixmap(self.image.scaled(
@@ -221,15 +227,14 @@ class MyScene(QGraphicsScene):
             Qt.IgnoreAspectRatio,
             Qt.SmoothTransformation))
         self.update()
+        self.scaleRatio = self.width() / self.w
         self.update_ItemPos()
 
     def update_ItemPos(self):
         """缩放场景和PixmapItem后，更新图中关键点和骨架连线的图元位置"""
-        sr = self.width() / self.w
-        # print("sr = ", sr)
         for i, point in enumerate(self.points_list):
             x, y = self.keypoints[i]
-            x, y = x*sr, y*sr
+            x, y = x*self.scaleRatio, y*self.scaleRatio
             lx, ly = self.center2LeftTop(x, y)
             w, h = self.wh, self.wh
             point.setRect(QRect(lx, ly, w, h))
@@ -262,3 +267,4 @@ class MyScene(QGraphicsScene):
             lx, ly = self.center2LeftTop(x, y)
             self.current_point.setRect(QRect(lx, ly, self.wh, self.wh))
             self.changeKeyPoints(x, y)
+
