@@ -1,13 +1,15 @@
 import json
 import time
+import os
 
 
 class label_it:
     """读取粗略的标注信息"""
-
     def __init__(self, annotation_file):
-        self.new_annotation_file = "label_" + \
-                                   time.strftime("%Y-%m-%d", time.localtime()) + ".json"
+        save_dir = "./annotation/"
+        if not os.path.exists(save_dir):
+            os.mkdir(save_dir)
+        self.new_annotation_file = save_dir + time.strftime("%Y-%m-%d", time.localtime()) + ".json"
         self.json_ann = json.load(open(annotation_file, "r"))
         self.annotations_list = self.json_ann["annotations"]
         self.images_list = self.json_ann["images"]

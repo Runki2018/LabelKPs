@@ -245,14 +245,15 @@ class myGUI:
 
     def go_img(self):
         """跳转到指定图像"""
-        index = int(self.lineEdit.text())  # 输入的范围是 1~图像数
-        if 0 < index <= self.img_number:
-            self.label.index = index - 1  # 索引是从0开始的
-            self.update_widget()
-            message = "提示：跳转到" + str(index)
-            self.statusBar.showMessage(message, 3000)
-        else:
-            self.statusBar.showMessage("提示：非法跳转！", 3000)
+        if self.lineEdit.text().isnumeric():
+            index = int(self.lineEdit.text())  # 输入的范围是 1~图像数
+            if 0 < index <= self.img_number:
+                self.label.index = index - 1  # 索引是从0开始的
+                self.update_widget()
+                message = "提示：跳转到" + str(index)
+                self.statusBar.showMessage(message, 3000)
+                return
+        self.statusBar.showMessage("提示：非法跳转！", 3000)
 
     def showBoneLine(self):
         """骨架连线可见性改变时触发该事件,给场景更新状态"""
