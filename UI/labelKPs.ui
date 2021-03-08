@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1048</width>
+    <width>1095</width>
     <height>772</height>
    </rect>
   </property>
@@ -43,9 +43,23 @@
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,1,0,1,1,0,2,0,4">
+         <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,2,0,1,1,0,1,1,0,2,1,5">
           <item>
            <widget class="Line" name="line_5">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_classes">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_6">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
@@ -58,6 +72,13 @@
             </property>
             <property name="checked">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="blur">
+            <property name="text">
+             <string>模糊</string>
             </property>
            </widget>
           </item>
@@ -104,7 +125,7 @@
            </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,1,10">
+           <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,2,10">
             <item>
              <widget class="QPushButton" name="goButton">
               <property name="text">
@@ -147,7 +168,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1048</width>
+     <width>1095</width>
      <height>26</height>
     </rect>
    </property>
@@ -164,8 +185,6 @@
     <property name="title">
      <string>编辑</string>
     </property>
-    <addaction name="action_drawpoint"/>
-    <addaction name="action_drawbox"/>
     <addaction name="separator"/>
     <addaction name="action_pre"/>
     <addaction name="action_next"/>
@@ -206,7 +225,7 @@
         <enum>QTabWidget::Triangular</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -496,34 +515,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+J</string>
-   </property>
-  </action>
-  <action name="action_drawpoint">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>关键点</string>
-   </property>
-   <property name="shortcut">
-    <string>X</string>
-   </property>
-   <property name="priority">
-    <enum>QAction::NormalPriority</enum>
-   </property>
-  </action>
-  <action name="action_drawbox">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>边界框</string>
-   </property>
-   <property name="shortcut">
-    <string>B</string>
    </property>
   </action>
   <action name="action_next">

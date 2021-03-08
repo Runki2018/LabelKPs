@@ -58,6 +58,7 @@ class myGUI:
 
         # checkBox
         self.is_occlusion = self.ui.is_occlusion  # 存在部分关键点被遮挡，默认为真
+        self.blur = self.ui.blur  # 手部是否模糊，默认为假
 
         # listWidget:
         self.listWidget_points = self.ui.listWidget_points  # 显示当前关键点坐标的列表框
@@ -83,6 +84,7 @@ class myGUI:
                                      "改点的两种鼠标操作方式：\n 1、左键点击后拖拽，释放左键\n"
                                      " 2、按左键点击选中，鼠标移动至合适位置后，按右键释放")
         self.example_picture.setPixmap(QPixmap("./Example.png"))
+        self.label_classes = self.ui.label_classes
 
         # lineEdit
         self.lineEdit = self.ui.lineEdit  # 输入框，用于输入将跳转的图片数
@@ -141,12 +143,15 @@ class myGUI:
         """更新控件：显示当前图片数的标签、绘图框、关键点列表"""
         text = "图片数：" + str(self.label.index + 1) + "/" + str(self.img_number)
         self.process_number.setText(text)
+        text = "类别：" + self.label.get_classes()
+        self.label_classes.setText(text)
         self.init_listWidget_points(self.label.get_raw_keypoints())
         self.init_graphicsView()
         file_item = self.listWidget_files.item(self.label.index)
         file_item.setSelected(True)  # 当前文件名高亮显示
-        # state = True if self.label.is_occlusion() else False  # 设置”部分遮挡“ 的状态
-        self.is_occlusion.setChecked(self.label.is_occlusion())
+        occlusion, blur = self.label.is_occlusion_blur()
+        self.is_occlusion.setChecked(occlusion)
+        self.blur.setChecked(blur)
 
     def init_listWidget_points(self, keypoints):
         self.points_list = []
@@ -224,7 +229,8 @@ class myGUI:
         for kp_tuple in self.scene.keypoints:
             keypoints.extend(kp_tuple)   # [(x1,y1),(x2,y2)] -> [x1,y1,x2,y2]
         self.set_CheckState(self.scene.keypoints)
-        self.label.set_occlusion(self.is_occlusion.isChecked())
+        occlusion, blur = self.is_occlusion.isChecked(), self.blur.isChecked()
+        self.label.set_occlusion_blur(occlusion, blur)
         self.label.update_keypoints(keypoints)
 
     def closeEventDialog(self, state):
@@ -250,6 +256,7 @@ class myGUI:
             if 0 < index <= self.img_number:
                 self.label.index = index - 1  # 索引是从0开始的
                 self.update_widget()
+                self.lineEdit.setText('')
                 message = "提示：跳转到" + str(index)
                 self.statusBar.showMessage(message, 3000)
                 return

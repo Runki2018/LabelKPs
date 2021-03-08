@@ -5,6 +5,8 @@ import os
 
 class label_it:
     """读取粗略的标注信息"""
+    classes = ["0-其他 ", "1-OK", "2-手掌", " 3-向上", "4-向下", "5-向右", "6-向左", "7-比心", "8-嘘"]
+
     def __init__(self, annotation_file):
         save_dir = "./annotation/"
         if not os.path.exists(save_dir):
@@ -23,14 +25,21 @@ class label_it:
             self.json_ann["info"]["image_index"] = 0
             self.index = 0  # 已处理的图像数
         self.image_number = len(self.images_list)  # 图像总数
-        # 初始化关键点遮挡状态
-        self.init_occlusionState()
+        # 初始化关键点遮挡和模糊状态
+        self.init_occlusion_blur()
 
     def get_imagePath(self):
         return self.images_list[self.index]["file_name"]
 
     def get_images_number(self):
         return len(self.images_list)
+
+    def get_classes(self):
+        """返还手势类别ID: 0~8
+        0-其他； 1-OK； 2-手掌； 3-向上； 4-向下； 5-向右； 6-向左； 7-比心； 8-嘘
+        """
+        class_id = self.images_list[self.index]["label"]
+        return self.classes[class_id]
 
     def get_raw_keypoints(self):
         """获取粗略的关键点坐标"""
@@ -49,13 +58,6 @@ class label_it:
             keypoints.insert(insert_i, 1)
         self.annotations_list[self.index]["keypoints"] = keypoints
 
-    # def update_index(self):
-    #     # if self.index < self.image_number:
-    #     #     print("old index = ", self.index)
-    #     #     self.index += 1 if self.index < self.image_number - 1 else 0
-    #     #     print("new index = ", self.index)
-    #     self.index += 1
-
     def save_annotations(self):
         """每次加载下一张图片时，自动调用该函数保存当前图像的修改"""
         self.json_ann["info"]["image_index"] = self.index
@@ -64,20 +66,6 @@ class label_it:
         json.dump(self.json_ann, open(self.new_annotation_file, "w"), indent=4)
         print(self.new_annotation_file)
         print("save!!!")
-
-    # def save_annotations(self, keypoints):
-    #     """每次加载下一张图片时，自动调用该函数保存当前图像的修改"""
-    #     self.json_ann["info"]["image_index"] = self.index
-    #     self.revise_annotation(keypoints)
-    #     self.json_ann["annotations"] = self.annotations_list
-    #     self.json_ann["images"] = self.images_list
-    #     if self.index < self.image_number:
-    #         print("index = ", self.index)
-    #         self.index += 1 if self.index < self.image_number - 1 else 0
-    #         print("index = ", self.index)
-    #         json.dump(self.json_ann, open(self.new_annotation_file, "w"), indent=4)
-    #         print(self.new_annotation_file)
-    #         print("save!!!")
 
     def image_CheckState(self, index):
         """判断该图像是否已经检查处理过，返回检查状态，用于初始化listWidget_files"""
@@ -92,27 +80,25 @@ class label_it:
         """三种状态：未检查、已检查未修改、已检查且修改"""
         self.images_list[self.index]["CheckState"] = check_state
 
-    def init_occlusionState(self):
-        """初始化关键点被遮挡状态,0:否，1：是"""
+    def init_occlusion_blur(self):
+        """初始化关键点被遮挡和模糊状态,0:否，1：是"""
         for index in range(self.image_number):
             if "occlusion" not in self.images_list[index].keys():
                 self.images_list[index]["occlusion"] = 1  # 默认被遮挡，因为大多数情况下，部分手指被遮挡。
+            if "blur" not in self.images_list[index].keys():
+                self.images_list[index]["blur"] = 0  # 默认图片手部是清晰的
 
-    def set_occlusion(self, is_occlusion=True):
-        """关键点被遮挡,0:否，1：是"""
+    def set_occlusion_blur(self, is_occlusion=True, blur=False):
+        """关键点被遮挡/模糊,0:否，1：是"""
         self.images_list[self.index]["occlusion"] = int(is_occlusion)
+        self.images_list[self.index]["blur"] = int(blur)
 
-    def is_occlusion(self):
-        """获取关键点被遮挡状态,0:否，1：是"""
-        return self.images_list[self.index]["occlusion"]
+    def is_occlusion_blur(self):
+        """获取关键点被遮挡状态, 0:否，1：是
+          图片是否模糊， 0:否，1：是
+        """
+        occlusion = self.images_list[self.index]["occlusion"]
+        blur = self.images_list[self.index]["blur"]
+        return occlusion, blur
 
 
-if __name__ == '__main__':
-    path = "C:/Users/WISE & BRAVE/Desktop/data_labelKps/new_annotations.json"
-    label_it(path)
-    ii = 0
-    ll = [x for x in range(63)]
-    for i in range(21):
-        ii += 2
-        ll.pop(ii)
-    print(ll)
