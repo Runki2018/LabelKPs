@@ -83,9 +83,14 @@ class label_it:
     def init_occlusion_blur(self):
         """初始化关键点被遮挡和模糊状态,0:否，1：是"""
         for index in range(self.image_number):
-            if "occlusion" not in self.images_list[index].keys():
-                self.images_list[index]["occlusion"] = 1  # 默认被遮挡，因为大多数情况下，部分手指被遮挡。
-            if "blur" not in self.images_list[index].keys():
+            keys = self.images_list[index].keys()
+            label = self.images_list[index]["label"]
+            if "occlusion" not in keys:
+                if label == 1 or label == 2:
+                    self.images_list[index]["occlusion"] = 0  # 无遮挡，因为大多数情况下，OK和手掌类是无遮挡的。
+                else:
+                    self.images_list[index]["occlusion"] = 1  # 被遮挡，因为大多数情况下，部分手指被遮挡。
+            if "blur" not in keys:
                 self.images_list[index]["blur"] = 0  # 默认图片手部是清晰的
 
     def set_occlusion_blur(self, is_occlusion=True, blur=False):
