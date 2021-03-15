@@ -106,4 +106,3 @@ class label_it:
         blur = self.images_list[self.index]["blur"]
         return occlusion, blur
 
-
