@@ -6,7 +6,7 @@ from app import myGUI
 
 def main():
     app = QApplication(sys.argv)
-    GUI = myGUI()  # 一定要创建类的实例，才能调用实例方法
+    GUI = myGUI()
     GUI.ui.show()
     sys.exit(app.exec_())
 
