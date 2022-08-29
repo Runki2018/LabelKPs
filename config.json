@@ -1,0 +1,128 @@
+{
+    "dataset_name": "hand_dataset",
+    "MediaPipe":                          
+    {
+        "max_num_hands": 4,               
+        "min_detection_confidence": 0.3,  
+        "bbox_scale_factor": 0.3,
+        "num_images": 100
+    },
+
+    "images_input_path": "F:/Download/Labelkps/ZHhands/JPEGImages",              
+    "annotations_output_path": "./",       
+    "annotation_file":"./annotation_file.json",
+
+    "categories_name": ["0-other ", "1-OK", "2-palm", "3-up",
+        "4-down", "5-right", "6-left", "7-finger_heart", "8-hush"],  
+
+    "categories_template":{
+        "supercategory": "hand",
+        "id": 1,
+        "name": "hand",
+        "keypoints": [
+            "wrist",
+            "thumb1",
+            "thumb2",
+            "thumb3",
+            "thumb4",
+            "forefinger1",
+            "forefinger2",
+            "forefinger3",
+            "forefinger4",
+            "middle_finger1",
+            "middle_finger2",
+            "middle_finger3",
+            "middle_finger4",
+            "ring_finger1",
+            "ring_finger2",
+            "ring_finger3",
+            "ring_finger4",
+            "pinky_finger1",
+            "pinky_finger2",
+            "pinky_finger3",
+            "pinky_finger4"
+        ],
+        "skeleton": [
+            [
+                1,
+                2
+            ],
+            [
+                2,
+                3
+            ],
+            [
+                3,
+                4
+            ],
+            [
+                4,
+                5
+            ],
+            [
+                1,
+                6
+            ],
+            [
+                6,
+                7
+            ],
+            [
+                7,
+                8
+            ],
+            [
+                8,
+                9
+            ],
+            [
+                1,
+                10
+            ],
+            [
+                10,
+                11
+            ],
+            [
+                11,
+                12
+            ],
+            [
+                12,
+                13
+            ],
+            [
+                1,
+                14
+            ],
+            [
+                14,
+                15
+            ],
+            [
+                15,
+                16
+            ],
+            [
+                16,
+                17
+            ],
+            [
+                1,
+                18
+            ],
+            [
+                18,
+                19
+            ],
+            [
+                19,
+                20
+            ],
+            [
+                20,
+                21
+            ]
+        ]
+    }
+}
