@@ -18,9 +18,9 @@
 ----------------
 
 ## 4、软件效果
-<center><img src="./demo.gif" width = "60%" height = "60%" alt="标注效果" align=center /></center>
-
+<center><img src="https://raw.githubusercontent.com/Runki2018/LabelKPs/main/demo.gif" width = "60%" height = "60%" alt="标注效果" align=center /></center>
 -----------------
+
 ## 5、已完成的功能
 + 图片加载、图片关键点检测与显示，图片跳转功能
 + 修改关键点坐标的功能
